@@ -1,0 +1,6 @@
+{
+  "name": "MaazXevents Hero",
+  "description": "A stunning hero section with a radial glassmorphism navigation setup and custom SVG mask styling, built in React.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-hedvig: "Hedvig Letters Serif", serif;
+}
+
+@keyframes infinite-loading {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-infinite-loading {
+  animation: infinite-loading 1.2s infinite ease-in-out;
+}
+
