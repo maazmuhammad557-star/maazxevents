@@ -91,7 +91,7 @@ export default function DetailPage({ item, onBack, onSelectItem }: DetailPagePro
             {/* Thumbnails */}
             <div className="w-full relative overflow-hidden" ref={constraintsRef}>
               <motion.div 
-                className="flex gap-3 py-2 cursor-grab active:cursor-grabbing w-max pr-4"
+                className="flex gap-3 py-2 cursor-grab active:cursor-grabbing w-max pr-6"
                 drag="x"
                 dragConstraints={constraintsRef}
                 dragElastic={0.15}
@@ -117,6 +117,9 @@ export default function DetailPage({ item, onBack, onSelectItem }: DetailPagePro
                   </motion.button>
                 ))}
               </motion.div>
+              {item.gallery.length > 4 && (
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#FDF7EF] via-[#FDF7EF]/70 to-transparent" />
+              )}
             </div>
           </div>
 
