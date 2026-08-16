@@ -69,7 +69,7 @@ export default function App() {
       const pathname = window.location.pathname;
       const match = pathname.match(/^\/item\/(.+)$/);
       if (match) {
-        const id = match[1];
+        const id = Number(match[1]);
         const item = contentRef.current?.themesSection.items.find((i) => i.id === id) || null;
         setPath(pathname);
         setSelectedItem(item);
@@ -101,7 +101,7 @@ export default function App() {
     if (!content) return;
     const match = window.location.pathname.match(/^\/item\/(.+)$/);
     if (match) {
-      const item = content.themesSection.items.find((i) => i.id === match[1]) || null;
+      const item = content.themesSection.items.find((i) => i.id === Number(match[1])) || null;
       if (item) setSelectedItem(item);
     }
   }, [content]);
