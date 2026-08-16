@@ -77,7 +77,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
       });
-      const data = await res.json();
+      const data = await parseJson(res);
       if (res.ok && data.success) {
         localStorage.setItem('admin_token', data.token);
         setIsLoggedIn(true);
@@ -93,6 +93,16 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
     localStorage.removeItem('admin_token');
     setIsLoggedIn(false);
     setPassword('');
+  };
+
+  // Safely parse a fetch response as JSON, falling back to its raw text
+  const parseJson = async (res: Response): Promise<any> => {
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { error: text || `Request failed (${res.status})` };
+    }
   };
 
   // Helper function to upload an image to Vercel Blob
@@ -111,11 +121,11 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
     });
     
     if (!res.ok) {
-      const errData = await res.json();
+      const errData = await parseJson(res);
       throw new Error(errData.error || 'Upload failed');
     }
     
-    const data = await res.json();
+    const data = await parseJson(res);
     return data.url;
   };
 
@@ -125,6 +135,12 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
 
     // Show loading indicator
     setSaveMessage({ type: 'success', text: `Uploading ${file.name}...` });
+
+    if (file.size > 4.5 * 1024 * 1024) {
+      setSaveMessage({ type: 'error', text: `Image too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Please upload under 4 MB.` });
+      e.target.value = '';
+      return;
+    }
 
     try {
       const url = await uploadImageFile(file);
@@ -168,7 +184,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
         body: JSON.stringify({ content }),
       });
 
-      const data = await res.json();
+      const data = await parseJson(res);
       if (res.ok && data.success) {
         setSaveMessage({ type: 'success', text: 'All changes saved and live successfully!' });
         // Refresh site content cached version on CDN by appending timestamp
@@ -560,6 +576,40 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
                     rows={3}
                     className="w-full px-4 py-2.5 rounded-xl border border-[#EAE4D9] text-sm text-[#2C2A26]"
                   />
+                </div>
+
+                {/* Social Media Links */}
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-[#F1EFEC]">
+                  <div>
+                    <label className="block text-xs font-bold text-[#5C584E] mb-2">Facebook Page Link</label>
+                    <input
+                      type="text"
+                      value={content.footer.facebookUrl}
+                      onChange={(e) => updateField('footer.facebookUrl', e.target.value)}
+                      placeholder="https://facebook.com/..."
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#EAE4D9] text-sm text-[#2C2A26]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#5C584E] mb-2">Instagram Profile Link</label>
+                    <input
+                      type="text"
+                      value={content.footer.instagramUrl}
+                      onChange={(e) => updateField('footer.instagramUrl', e.target.value)}
+                      placeholder="https://instagram.com/..."
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#EAE4D9] text-sm text-[#2C2A26]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#5C584E] mb-2">TikTok Profile Link</label>
+                    <input
+                      type="text"
+                      value={content.footer.tiktokUrl || ''}
+                      onChange={(e) => updateField('footer.tiktokUrl', e.target.value)}
+                      placeholder="https://tiktok.com/@..."
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#EAE4D9] text-sm text-[#2C2A26]"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
