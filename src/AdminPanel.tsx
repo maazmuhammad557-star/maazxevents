@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   CalendarCheck, Save, Upload, Plus, Trash2, Edit3, 
   LogOut, Settings, Image as ImageIcon, FileText, Layers, 
-  ChevronRight, Sparkles, X, PlusCircle, CheckCircle
+  ChevronRight, Sparkles, X, PlusCircle, CheckCircle, Menu
 } from 'lucide-react';
 import { SiteContent, ThemeItem } from './types';
 import { defaultContent } from './defaultContent';
@@ -28,6 +28,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
   const [formParentCategory, setFormParentCategory] = useState<string>('Wedding');
   const [editingItem, setEditingItem] = useState<ThemeItem | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const findParentCategory = (subcat: string): string => {
     for (const [parent, subs] of Object.entries(content.themesSection.subcategories)) {
@@ -297,16 +298,27 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
 
   return (
     <div className="min-h-screen bg-[#F9F6F0] text-[#5C584E] flex font-sans selection:bg-[#6A665A] selection:text-white">
+      {/* Mobile Backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Left Dark Sidebar (Tabela Inspired) */}
-      <aside className="w-[280px] bg-[#1E1B18] text-white flex flex-col justify-between shrink-0 h-screen sticky top-0 border-r border-[#2C2A26] z-30">
+      <aside className={`fixed inset-y-0 left-0 z-40 w-[280px] max-w-[85vw] bg-[#1E1B18] text-white flex flex-col justify-between shrink-0 border-r border-[#2C2A26] transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div>
           {/* Top Brand Logo */}
-          <div className="p-6 border-b border-[#2C2A26] flex items-center gap-3">
+          <div className="p-6 border-b border-[#2C2A26] flex items-center justify-between">
             <img src="/logo.png" alt="Logo" className="h-8 w-auto filter brightness-0 invert opacity-90" />
-            <div>
-              <span className="block text-xs font-bold tracking-wider uppercase text-white leading-none">MaazXEvents</span>
-              <span className="block text-[8px] font-semibold text-[#8E8A82] uppercase mt-1">Control Center</span>
-            </div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden p-1.5 rounded-lg hover:bg-white/10 text-[#8E8A82] transition cursor-pointer"
+              aria-label="Close menu"
+            >
+              <X size={18} />
+            </button>
           </div>
 
           {/* Navigation Menu Tabs */}
@@ -314,7 +326,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
             <p className="text-[9px] font-bold text-[#8E8A82] uppercase tracking-wider px-3 mb-2">Sections</p>
             
             <button
-              onClick={() => { setActiveTab('general'); setEditingItem(null); }}
+              onClick={() => { setActiveTab('general'); setEditingItem(null); setSidebarOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl text-xs font-semibold transition flex items-center gap-3 cursor-pointer ${
                 activeTab === 'general' 
                   ? 'bg-[#343029] text-[#E7E2D8] shadow-md border-l-4 border-[#C8C2B7]' 
@@ -326,7 +338,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
             </button>
 
             <button
-              onClick={() => { setActiveTab('hero'); setEditingItem(null); }}
+              onClick={() => { setActiveTab('hero'); setEditingItem(null); setSidebarOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl text-xs font-semibold transition flex items-center gap-3 cursor-pointer ${
                 activeTab === 'hero' 
                   ? 'bg-[#343029] text-[#E7E2D8] shadow-md border-l-4 border-[#C8C2B7]' 
@@ -338,7 +350,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
             </button>
 
             <button
-              onClick={() => { setActiveTab('why'); setEditingItem(null); }}
+              onClick={() => { setActiveTab('why'); setEditingItem(null); setSidebarOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl text-xs font-semibold transition flex items-center gap-3 cursor-pointer ${
                 activeTab === 'why' 
                   ? 'bg-[#343029] text-[#E7E2D8] shadow-md border-l-4 border-[#C8C2B7]' 
@@ -350,7 +362,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
             </button>
 
             <button
-              onClick={() => { setActiveTab('about'); setEditingItem(null); }}
+              onClick={() => { setActiveTab('about'); setEditingItem(null); setSidebarOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl text-xs font-semibold transition flex items-center gap-3 cursor-pointer ${
                 activeTab === 'about' 
                   ? 'bg-[#343029] text-[#E7E2D8] shadow-md border-l-4 border-[#C8C2B7]' 
@@ -362,7 +374,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
             </button>
 
             <button
-              onClick={() => { setActiveTab('themes'); }}
+              onClick={() => { setActiveTab('themes'); setSidebarOpen(false); }}
               className={`w-full text-left px-4 py-3 rounded-xl text-xs font-semibold transition flex items-center gap-3 cursor-pointer ${
                 activeTab === 'themes' 
                   ? 'bg-[#343029] text-[#E7E2D8] shadow-md border-l-4 border-[#C8C2B7]' 
@@ -400,39 +412,48 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
       {/* Right Content Area (Forms viewport) */}
       <div className="flex-1 flex flex-col min-h-screen overflow-y-auto">
         {/* Content Header (Top Action Bar) */}
-        <header className="sticky top-0 bg-[#FDF7EF]/95 backdrop-blur-md border-b border-[#EAE4D9]/80 px-8 py-5 flex items-center justify-between z-20 shadow-sm">
-          <div>
-            <h1 className="text-lg font-serif font-bold text-[#2C2A26] leading-none">
-              {activeTab === 'general' && 'General Branding'}
-              {activeTab === 'hero' && 'Hero Billboard Section'}
-              {activeTab === 'why' && 'Why Choose Us Section'}
-              {activeTab === 'about' && 'About Studio narrative'}
-              {activeTab === 'themes' && 'Themes & Catalog Manager'}
-            </h1>
-            <p className="text-[10px] text-[#8A867A] mt-1.5">Manage live content, text edits, and asset uploads</p>
+        <header className="sticky top-0 bg-[#FDF7EF]/95 backdrop-blur-md border-b border-[#EAE4D9]/80 px-4 sm:px-6 lg:px-8 py-4 lg:py-5 flex items-center justify-between gap-3 z-20 shadow-sm">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 -ml-1 rounded-xl hover:bg-black/5 text-[#5C584E] transition cursor-pointer shrink-0"
+              aria-label="Open menu"
+            >
+              <Menu size={20} />
+            </button>
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg font-serif font-bold text-[#2C2A26] leading-none truncate">
+                {activeTab === 'general' && 'General Branding'}
+                {activeTab === 'hero' && 'Hero Billboard Section'}
+                {activeTab === 'why' && 'Why Choose Us Section'}
+                {activeTab === 'about' && 'About Studio narrative'}
+                {activeTab === 'themes' && 'Themes & Catalog Manager'}
+              </h1>
+              <p className="text-[10px] text-[#8A867A] mt-1.5 hidden sm:block">Manage live content, text edits, and asset uploads</p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => window.open('/', '_blank')}
-              className="px-4 py-2 hover:bg-black/5 border border-[#EAE4D9] rounded-xl text-xs font-bold text-[#5C584E] transition cursor-pointer"
+              className="hidden sm:flex px-4 py-2 hover:bg-black/5 border border-[#EAE4D9] rounded-xl text-xs font-bold text-[#5C584E] transition cursor-pointer"
             >
               Preview Site
             </button>
             <button
               onClick={handleSaveAll}
               disabled={isSaving}
-              className="flex items-center gap-2 bg-[#6A665A] hover:bg-[#5C584E] text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-md disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-2 bg-[#6A665A] hover:bg-[#5C584E] text-white px-3 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-md disabled:opacity-50 cursor-pointer"
             >
               <Save size={14} />
-              <span>{isSaving ? 'Saving Changes...' : 'Save & Publish'}</span>
+              <span>{isSaving ? 'Saving...' : 'Save & Publish'}</span>
             </button>
           </div>
         </header>
 
         {/* Save Notification Toast */}
         {saveMessage && (
-          <div className={`fixed top-24 right-6 z-[60] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl border text-sm font-medium animate-bounce ${
+          <div className={`fixed top-20 left-4 right-4 sm:left-auto sm:right-6 sm:top-24 z-[60] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl border text-sm font-medium animate-bounce ${
             saveMessage.type === 'success' ? 'bg-[#FDF7EF] text-[#6A665A] border-[#EAE4D9]' : 'bg-red-50 text-red-600 border-red-100'
           }`}>
             {saveMessage.type === 'success' && <CheckCircle size={18} />}
@@ -441,7 +462,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
         )}
 
         {/* Scrollable Form Panel canvas */}
-        <div className="flex-1 p-6 lg:p-8 max-w-[1500px] w-full mx-auto">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1500px] w-full mx-auto">
           
           {/* TAB 1: GENERAL */}
           {activeTab === 'general' && (
