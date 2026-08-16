@@ -43,6 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const blob = await put('content.json', JSON.stringify(content, null, 2), {
       access: 'public',
       addRandomSuffix: false,
+      allowOverwrite: true,
       token: blobToken,
     });
 
