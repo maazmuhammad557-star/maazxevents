@@ -14,6 +14,30 @@ export default function App() {
   const [path, setPath] = useState(window.location.pathname);
   const [content, setContent] = useState<SiteContent | null>(null);
   const [selectedItem, setSelectedItem] = useState<ThemeItem | null>(null);
+  const scrollPosRef = React.useRef(0);
+  const contentRef = React.useRef<SiteContent | null>(null);
+  contentRef.current = content;
+
+  const handleSelectItem = (item: ThemeItem) => {
+    scrollPosRef.current = window.scrollY;
+    window.history.pushState({ maazx: 'app' }, '', `/item/${item.id}`);
+    setSelectedItem(item);
+  };
+
+  const handleGoHome = () => {
+    setSelectedItem(null);
+    window.history.pushState({ maazx: 'app' }, '', '/');
+    setPath('/');
+    window.scrollTo(0, 0);
+  };
+
+  const handleBackToCatalog = () => {
+    if (window.history.state?.maazx === 'app') {
+      window.history.back();
+    } else {
+      handleGoHome();
+    }
+  };
 
   useEffect(() => {
     const handleCmsUpdate = (e: Event) => {
@@ -41,8 +65,28 @@ export default function App() {
     };
     fetchContent();
 
+    const resolveItemRoute = () => {
+      const pathname = window.location.pathname;
+      const match = pathname.match(/^\/item\/(.+)$/);
+      if (match) {
+        const id = match[1];
+        const item = contentRef.current?.themesSection.items.find((i) => i.id === id) || null;
+        setPath(pathname);
+        setSelectedItem(item);
+        if (item) {
+          setTimeout(() => window.scrollTo(0, 0), 40);
+        }
+      } else {
+        setPath(pathname);
+        setSelectedItem(null);
+        if (pathname === '/') {
+          setTimeout(() => window.scrollTo(0, scrollPosRef.current), 40);
+        }
+      }
+    };
+
     const handlePopState = () => {
-      setPath(window.location.pathname);
+      resolveItemRoute();
     };
     window.addEventListener('popstate', handlePopState);
 
@@ -52,8 +96,18 @@ export default function App() {
     };
   }, []);
 
+  // On first load, support deep links to /item/:id
+  useEffect(() => {
+    if (!content) return;
+    const match = window.location.pathname.match(/^\/item\/(.+)$/);
+    if (match) {
+      const item = content.themesSection.items.find((i) => i.id === match[1]) || null;
+      if (item) setSelectedItem(item);
+    }
+  }, [content]);
+
   const navigate = (newPath: string) => {
-    window.history.pushState({}, '', newPath);
+    window.history.pushState({ maazx: 'app' }, '', newPath);
     setPath(newPath);
   };
 
@@ -79,8 +133,8 @@ export default function App() {
       <React.Suspense fallback={<div className="min-h-screen bg-[#FDF7EF] flex items-center justify-center">Loading...</div>}>
         <DetailPage 
           item={selectedItem} 
-          onBack={() => setSelectedItem(null)} 
-          onSelectItem={setSelectedItem}
+          onBack={handleBackToCatalog} 
+          onSelectItem={handleSelectItem}
         />
       </React.Suspense>
     );
@@ -88,7 +142,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#FDF7EF] text-[#5C584E] font-sans selection:bg-[#6A665A] selection:text-white overflow-x-clip">
-      <Header onNavigateHome={() => setSelectedItem(null)} content={content} />
+      <Header onNavigateHome={handleGoHome} content={content} />
 
       {/* Hero Section */}
       <main className="px-4 md:px-12 pb-12 flex justify-center">
@@ -182,7 +236,7 @@ export default function App() {
         </div>
       </main>
 
-      <ThemesSection onSelectItem={setSelectedItem} content={content} />
+      <ThemesSection onSelectItem={handleSelectItem} content={content} />
 
       <React.Suspense fallback={<div className="h-40 flex items-center justify-center">Loading...</div>}>
         <WhyChooseUs content={content} />
