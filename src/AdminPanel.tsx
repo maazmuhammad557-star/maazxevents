@@ -110,6 +110,10 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
     const token = localStorage.getItem('admin_token');
     if (!token) throw new Error('Unauthorized');
 
+    if (file.size > 4.5 * 1024 * 1024) {
+      throw new Error(`Image too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Please upload under 4 MB.`);
+    }
+
     const res = await fetch('/api/upload-image', {
       method: 'POST',
       headers: {
@@ -135,12 +139,6 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
 
     // Show loading indicator
     setSaveMessage({ type: 'success', text: `Uploading ${file.name}...` });
-
-    if (file.size > 4.5 * 1024 * 1024) {
-      setSaveMessage({ type: 'error', text: `Image too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Please upload under 4 MB.` });
-      e.target.value = '';
-      return;
-    }
 
     try {
       const url = await uploadImageFile(file);
