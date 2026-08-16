@@ -182,11 +182,11 @@ export default function App() {
         </div>
       </main>
 
+      <ThemesSection onSelectItem={setSelectedItem} content={content} />
+
       <React.Suspense fallback={<div className="h-40 flex items-center justify-center">Loading...</div>}>
         <WhyChooseUs content={content} />
       </React.Suspense>
-
-      <ThemesSection onSelectItem={setSelectedItem} content={content} />
 
       <React.Suspense fallback={<div className="h-40 flex items-center justify-center">Loading...</div>}>
         <AboutUs content={content} />
