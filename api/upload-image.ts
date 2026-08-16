@@ -47,6 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const blob = await put(fileName, req, {
       access: 'public',
       contentType,
+      addRandomSuffix: true,
       token: blobToken,
     });
 
