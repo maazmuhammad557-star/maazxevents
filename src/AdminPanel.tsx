@@ -50,6 +50,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [subcatInputs, setSubcatInputs] = useState<Record<string, string>>({});
   const [editingSubcat, setEditingSubcat] = useState<{ parent: string; oldName: string; value: string } | null>(null);
+  const [editingCat, setEditingCat] = useState<{ oldName: string; value: string } | null>(null);
 
   const findParentCategory = (subcat: string): string => {
     for (const [parent, subs] of Object.entries(content.themesSection.subcategories)) {
@@ -307,6 +308,36 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
       return updated;
     });
     setSaveMessage({ type: 'success', text: `Subcategory "${name}" added to ${parent}.` });
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  const renameCategory = (oldName: string, rawName: string) => {
+    const name = rawName.trim();
+    if (!name) {
+      setSaveMessage({ type: 'error', text: 'Category name cannot be empty.' });
+      return;
+    }
+    if (name === oldName) {
+      setEditingCat(null);
+      return;
+    }
+    if (content.themesSection.categories.some((c) => c.toLowerCase() === name.toLowerCase())) {
+      setSaveMessage({ type: 'error', text: `"${name}" already exists as a category.` });
+      return;
+    }
+    setContent((prev) => {
+      const updated = { ...prev, themesSection: { ...prev.themesSection } };
+      updated.themesSection.categories = prev.themesSection.categories.map((c) =>
+        c === oldName ? name : c
+      );
+      const subs = prev.themesSection.subcategories[oldName] || [];
+      const { [oldName]: _removed, ...rest } = prev.themesSection.subcategories;
+      updated.themesSection.subcategories = { ...rest, [name]: subs };
+      return updated;
+    });
+    if (selectedCategory === oldName) setSelectedCategory(name);
+    setEditingCat(null);
+    setSaveMessage({ type: 'success', text: `Renamed category "${oldName}" to "${name}".` });
     setTimeout(() => setSaveMessage(null), 3000);
   };
 
@@ -1387,7 +1418,46 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
                           <div key={cat} className="border border-[#F1EFEC] rounded-xl p-3.5 bg-[#FDF7EF]/50">
                             <div className="flex items-center justify-between mb-2.5">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-[#2C2A26]">{cat}</span>
+                                {editingCat && editingCat.oldName === cat ? (
+                                  <div className="flex items-center gap-1.5 bg-white border border-[#6A665A] rounded-full pl-3 pr-1.5 py-1">
+                                    <input
+                                      type="text"
+                                      value={editingCat.value}
+                                      autoFocus
+                                      onChange={(e) => setEditingCat({ ...editingCat, value: e.target.value })}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') renameCategory(cat, editingCat.value);
+                                        if (e.key === 'Escape') setEditingCat(null);
+                                      }}
+                                      className="w-32 bg-transparent text-xs font-medium text-[#2C2A26] focus:outline-none"
+                                    />
+                                    <button
+                                      onClick={() => renameCategory(cat, editingCat.value)}
+                                      className="p-1 text-[#6A665A] hover:text-[#2C2A26] transition cursor-pointer"
+                                      title="Save"
+                                    >
+                                      <Check size={12} />
+                                    </button>
+                                    <button
+                                      onClick={() => setEditingCat(null)}
+                                      className="p-1 text-[#8A867A] hover:text-red-500 transition cursor-pointer"
+                                      title="Cancel"
+                                    >
+                                      <X size={12} />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <span className="text-xs font-bold text-[#2C2A26]">{cat}</span>
+                                    <button
+                                      onClick={() => setEditingCat({ oldName: cat, value: cat })}
+                                      className="p-1 text-[#8A867A] hover:text-[#6A665A] transition cursor-pointer"
+                                      title="Rename Category"
+                                    >
+                                      <Edit3 size={12} />
+                                    </button>
+                                  </>
+                                )}
                                 <span className="text-[9px] font-semibold text-[#8A867A] bg-[#EBE7DF]/70 px-2 py-0.5 rounded-full">{subs.length} subcategory{subs.length === 1 ? '' : 'ies'}</span>
                               </div>
                             </div>
