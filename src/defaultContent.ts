@@ -97,8 +97,8 @@ export const defaultContent: SiteContent = {
     items: mockItems,
   },
   seo: {
-    metaTitle: 'Maazx Events',
-    metaDescription: 'Premium event and birthday decoration studio crafting Instagram-worthy celebrations.',
+    metaTitle: 'Maazx Events | Premium Event & Birthday Decoration Studio',
+    metaDescription: 'Premium event and birthday decoration studio crafting Instagram-worthy celebrations across Pakistan. Bridal showers, Nikkah, Mehndi, birthdays and more.',
     favicon: '/logo.png',
   }
 };
