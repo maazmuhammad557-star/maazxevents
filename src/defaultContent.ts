@@ -83,6 +83,7 @@ export const defaultContent: SiteContent = {
     email: 'eventsbymaaz@gmail.com',
     facebookUrl: '#',
     instagramUrl: '#',
+    tiktokUrl: '#',
     copyright: '© 2026 MaazXevents. All rights reserved',
   },
   themesSection: {

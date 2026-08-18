@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   CalendarCheck, Save, Upload, Plus, Trash2, Edit3, 
   LogOut, Settings, Image as ImageIcon, FileText, Layers, 
-  ChevronRight, Sparkles, X, PlusCircle, CheckCircle, Menu
+  ChevronRight, Sparkles, X, PlusCircle, CheckCircle, Menu, Check
 } from 'lucide-react';
 import { SiteContent, ThemeItem } from './types';
 import { defaultContent } from './defaultContent';
@@ -29,6 +29,8 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
   const [editingItem, setEditingItem] = useState<ThemeItem | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [subcatInputs, setSubcatInputs] = useState<Record<string, string>>({});
+  const [editingSubcat, setEditingSubcat] = useState<{ parent: string; oldName: string; value: string } | null>(null);
 
   const findParentCategory = (subcat: string): string => {
     for (const [parent, subs] of Object.entries(content.themesSection.subcategories)) {
@@ -262,6 +264,84 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
       ]
     });
     setIsAddingNew(true);
+  };
+
+  // CRUD Helpers for Categories / Subcategories
+  const addSubcategory = (parent: string, rawName: string) => {
+    const name = rawName.trim();
+    if (!name) {
+      setSaveMessage({ type: 'error', text: 'Subcategory name cannot be empty.' });
+      return;
+    }
+    const existing = content.themesSection.subcategories[parent] || [];
+    if (existing.some((s) => s.toLowerCase() === name.toLowerCase())) {
+      setSaveMessage({ type: 'error', text: `"${name}" already exists in ${parent}.` });
+      return;
+    }
+    setContent((prev) => {
+      const updated = { ...prev, themesSection: { ...prev.themesSection } };
+      updated.themesSection.subcategories = {
+        ...prev.themesSection.subcategories,
+        [parent]: [...existing, name],
+      };
+      return updated;
+    });
+    setSaveMessage({ type: 'success', text: `Subcategory "${name}" added to ${parent}.` });
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  const renameSubcategory = (parent: string, oldName: string, rawName: string) => {
+    const name = rawName.trim();
+    if (!name) {
+      setSaveMessage({ type: 'error', text: 'Subcategory name cannot be empty.' });
+      return;
+    }
+    if (name === oldName) {
+      setEditingSubcat(null);
+      return;
+    }
+    const existing = content.themesSection.subcategories[parent] || [];
+    if (existing.some((s) => s.toLowerCase() === name.toLowerCase())) {
+      setSaveMessage({ type: 'error', text: `"${name}" already exists in ${parent}.` });
+      return;
+    }
+    setContent((prev) => {
+      const updated = { ...prev, themesSection: { ...prev.themesSection } };
+      const subs = (updated.themesSection.subcategories[parent] || []).map((s) =>
+        s === oldName ? name : s
+      );
+      updated.themesSection.subcategories = {
+        ...prev.themesSection.subcategories,
+        [parent]: subs,
+      };
+      updated.themesSection.items = updated.themesSection.items.map((item) =>
+        item.category === oldName ? { ...item, category: name } : item
+      );
+      return updated;
+    });
+    if (selectedSubcategory === oldName) setSelectedSubcategory('All');
+    setEditingSubcat(null);
+    setSaveMessage({ type: 'success', text: `Renamed "${oldName}" to "${name}".` });
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  const deleteSubcategory = (parent: string, name: string) => {
+    const itemCount = content.themesSection.items.filter((i) => i.category === name).length;
+    if (!window.confirm(`Delete subcategory "${name}" and ALL its theme setups${itemCount > 0 ? ` (${itemCount} items)` : ''}?`)) return;
+    setContent((prev) => {
+      const updated = { ...prev, themesSection: { ...prev.themesSection } };
+      const subs = (prev.themesSection.subcategories[parent] || []).filter((s) => s !== name);
+      updated.themesSection.subcategories = {
+        ...prev.themesSection.subcategories,
+        [parent]: subs,
+      };
+      updated.themesSection.items = prev.themesSection.items.filter((item) => item.category !== name);
+      return updated;
+    });
+    if (selectedSubcategory === name) setSelectedSubcategory('All');
+    if (editingSubcat?.oldName === name) setEditingSubcat(null);
+    setSaveMessage({ type: 'success', text: `Subcategory "${name}" and its setups deleted.` });
+    setTimeout(() => setSaveMessage(null), 3000);
   };
 
   if (!isLoggedIn) {
@@ -1207,6 +1287,110 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
                       <Plus size={16} />
                       Add Setup Card
                     </button>
+                  </div>
+
+                  {/* Categories & Subcategories Manager */}
+                  <div className="flex flex-col gap-4 border border-[#EAE4D9] rounded-2xl bg-white p-4 sm:p-5">
+                    <div>
+                      <h3 className="text-sm font-serif font-semibold text-[#2C2A26]">Categories & Subcategories Manager</h3>
+                      <p className="text-[10px] text-[#8A867A] mt-0.5">Add, rename, or remove subcategories for each main category</p>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      {content.themesSection.categories.map((cat) => {
+                        const subs = content.themesSection.subcategories[cat] || [];
+                        return (
+                          <div key={cat} className="border border-[#F1EFEC] rounded-xl p-3.5 bg-[#FDF7EF]/50">
+                            <div className="flex items-center justify-between mb-2.5">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-[#2C2A26]">{cat}</span>
+                                <span className="text-[9px] font-semibold text-[#8A867A] bg-[#EBE7DF]/70 px-2 py-0.5 rounded-full">{subs.length} subcategory{subs.length === 1 ? '' : 'ies'}</span>
+                              </div>
+                            </div>
+
+                            {subs.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                {subs.map((sub) =>
+                                  editingSubcat && editingSubcat.parent === cat && editingSubcat.oldName === sub ? (
+                                    <div key={sub} className="flex items-center gap-1.5 bg-white border border-[#6A665A] rounded-full pl-3 pr-1.5 py-1">
+                                      <input
+                                        type="text"
+                                        value={editingSubcat.value}
+                                        autoFocus
+                                        onChange={(e) => setEditingSubcat({ ...editingSubcat, value: e.target.value })}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') renameSubcategory(cat, sub, editingSubcat.value);
+                                          if (e.key === 'Escape') setEditingSubcat(null);
+                                        }}
+                                        className="w-32 bg-transparent text-xs font-medium text-[#2C2A26] focus:outline-none"
+                                      />
+                                      <button
+                                        onClick={() => renameSubcategory(cat, sub, editingSubcat.value)}
+                                        className="p-1 text-[#6A665A] hover:text-[#2C2A26] transition cursor-pointer"
+                                        title="Save"
+                                      >
+                                        <Check size={12} />
+                                      </button>
+                                      <button
+                                        onClick={() => setEditingSubcat(null)}
+                                        className="p-1 text-[#8A867A] hover:text-red-500 transition cursor-pointer"
+                                        title="Cancel"
+                                      >
+                                        <X size={12} />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <span key={sub} className="flex items-center gap-1.5 bg-white border border-[#EAE4D9] rounded-full pl-3 pr-1 py-1">
+                                      <span className="text-xs font-medium text-[#5C584E]">{sub}</span>
+                                      <button
+                                        onClick={() => setEditingSubcat({ parent: cat, oldName: sub, value: sub })}
+                                        className="p-1 text-[#8A867A] hover:text-[#6A665A] transition cursor-pointer"
+                                        title="Rename"
+                                      >
+                                        <Edit3 size={11} />
+                                      </button>
+                                      <button
+                                        onClick={() => deleteSubcategory(cat, sub)}
+                                        className="p-1 text-[#8A867A] hover:text-red-500 transition cursor-pointer"
+                                        title="Delete"
+                                      >
+                                        <Trash2 size={11} />
+                                      </button>
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            )}
+
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                placeholder="New subcategory name..."
+                                value={subcatInputs[cat] || ''}
+                                onChange={(e) => setSubcatInputs((prev) => ({ ...prev, [cat]: e.target.value }))}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    addSubcategory(cat, subcatInputs[cat] || '');
+                                    setSubcatInputs((prev) => ({ ...prev, [cat]: '' }));
+                                  }
+                                }}
+                                className="flex-1 px-3 py-1.5 border border-[#EAE4D9] rounded-lg text-xs text-[#2C2A26] focus:outline-none focus:ring-2 focus:ring-[#6A665A]/30"
+                              />
+                              <button
+                                onClick={() => {
+                                  addSubcategory(cat, subcatInputs[cat] || '');
+                                  setSubcatInputs((prev) => ({ ...prev, [cat]: '' }));
+                                }}
+                                className="flex items-center gap-1 bg-[#6A665A] hover:bg-[#5C584E] text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition cursor-pointer"
+                              >
+                                <Plus size={12} />
+                                Add
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Filter Toolbar */}

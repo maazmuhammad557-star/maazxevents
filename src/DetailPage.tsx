@@ -16,6 +16,26 @@ export default function DetailPage({ item, onBack, onSelectItem }: DetailPagePro
   const [[page, direction], setPage] = useState([0, 0]);
   const constraintsRef = useRef<HTMLDivElement>(null);
   
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const swipeDistance = touchEndX.current - touchStartX.current;
+    // Swipe left-to-right to go back
+    if (swipeDistance > 120) {
+      onBack();
+    }
+  };
+  
   // Update state when item changes
   useEffect(() => {
     setPage([0, 0]);
@@ -40,7 +60,12 @@ export default function DetailPage({ item, onBack, onSelectItem }: DetailPagePro
   );
 
   return (
-    <div className="min-h-screen bg-[#FDF7EF] text-[#5C584E] font-sans selection:bg-black selection:text-white">
+    <div 
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className="min-h-screen bg-[#FDF7EF] text-[#5C584E] font-sans selection:bg-black selection:text-white"
+    >
       <Header isDetail={true} onNavigateHome={onBack} />
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12 mt-8">
         
@@ -91,8 +116,8 @@ export default function DetailPage({ item, onBack, onSelectItem }: DetailPagePro
             {/* Thumbnails */}
             <div className="w-full relative overflow-hidden" ref={constraintsRef}>
               <motion.div 
-                className="flex gap-3 py-2 cursor-grab active:cursor-grabbing w-max pr-6"
-                drag="x"
+                className={`flex gap-3 px-2 py-2 ${item.gallery.length > 4 ? 'cursor-grab active:cursor-grabbing w-max pr-6' : 'justify-start'}`}
+                drag={item.gallery.length > 4 ? "x" : false}
                 dragConstraints={constraintsRef}
                 dragElastic={0.15}
                 dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
@@ -136,7 +161,7 @@ export default function DetailPage({ item, onBack, onSelectItem }: DetailPagePro
               {item.category}
             </span>
             
-            <h1 className="font-serif text-[40px] md:text-[48px] text-[#2C2A26] mb-8 leading-tight">
+            <h1 className="font-serif text-[28px] sm:text-[36px] md:text-[48px] text-[#2C2A26] mb-8 leading-tight">
               {item.title}
             </h1>
             

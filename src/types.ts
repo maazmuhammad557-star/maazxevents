@@ -69,6 +69,7 @@ export interface SiteContent {
     email: string;
     facebookUrl: string;
     instagramUrl: string;
+    tiktokUrl: string;
     copyright: string;
   };
   themesSection: {

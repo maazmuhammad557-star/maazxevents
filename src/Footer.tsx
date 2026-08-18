@@ -59,12 +59,19 @@ export default function Footer({ content }: FooterProps) {
         {/* Bottom Row */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mt-20 pt-6">
           <div className="flex items-center gap-4">
-            <a href={footer.facebookUrl} className="w-[42px] h-[42px] rounded-xl bg-black/5 flex items-center justify-center text-[#4D4943] hover:bg-black/10 transition-colors">
+            <a href={footer.facebookUrl} target="_blank" rel="noopener noreferrer" className="w-[42px] h-[42px] rounded-xl bg-black/5 flex items-center justify-center text-[#4D4943] hover:bg-black/10 transition-colors">
               <Facebook className="w-[22px] h-[22px]" strokeWidth={1.5} />
             </a>
-            <a href={footer.instagramUrl} className="w-[42px] h-[42px] rounded-xl bg-black/5 flex items-center justify-center text-[#4D4943] hover:bg-black/10 transition-colors">
+            <a href={footer.instagramUrl} target="_blank" rel="noopener noreferrer" className="w-[42px] h-[42px] rounded-xl bg-black/5 flex items-center justify-center text-[#4D4943] hover:bg-black/10 transition-colors">
               <Instagram className="w-[22px] h-[22px]" strokeWidth={1.5} />
             </a>
+            {footer.tiktokUrl && (
+              <a href={footer.tiktokUrl} target="_blank" rel="noopener noreferrer" className="w-[42px] h-[42px] rounded-xl bg-black/5 flex items-center justify-center text-[#4D4943] hover:bg-black/10 transition-colors">
+                <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                </svg>
+              </a>
+            )}
           </div>
           <p className="text-[#57554C] text-[15px] font-medium">
             {footer.copyright}
