@@ -14,6 +14,8 @@ export default function App() {
   const [path, setPath] = useState(window.location.pathname);
   const [content, setContent] = useState<SiteContent | null>(null);
   const [selectedItem, setSelectedItem] = useState<ThemeItem | null>(null);
+  const [activeCategory, setActiveCategory] = useState('');
+  const [activeSubcategory, setActiveSubcategory] = useState('');
   const scrollPosRef = React.useRef(0);
   const contentRef = React.useRef<SiteContent | null>(null);
   contentRef.current = content;
@@ -41,7 +43,25 @@ export default function App() {
 
   useEffect(() => {
     const handleCmsUpdate = (e: Event) => {
-      setContent((e as CustomEvent).detail);
+      const data = (e as CustomEvent).detail;
+      const merged = {
+        ...defaultContent,
+        ...data,
+        header: { ...defaultContent.header, ...data.header },
+        hero: { ...defaultContent.hero, ...data.hero },
+        whyChooseUs: { ...defaultContent.whyChooseUs, ...data.whyChooseUs },
+        aboutUs: { ...defaultContent.aboutUs, ...data.aboutUs },
+        footer: { ...defaultContent.footer, ...data.footer },
+        themesSection: {
+          ...defaultContent.themesSection,
+          ...data.themesSection,
+          categories: data.themesSection?.categories || defaultContent.themesSection.categories,
+          subcategories: data.themesSection?.subcategories || defaultContent.themesSection.subcategories,
+          items: data.themesSection?.items || defaultContent.themesSection.items,
+        },
+        seo: { ...defaultContent.seo, ...data.seo },
+      };
+      setContent(merged);
     };
     window.addEventListener('cms-content-updated', handleCmsUpdate);
 
@@ -52,7 +72,24 @@ export default function App() {
           const data = await res.json();
           // If the redirect returned valid json
           if (data && data.header) {
-            setContent(data);
+            const merged = {
+              ...defaultContent,
+              ...data,
+              header: { ...defaultContent.header, ...data.header },
+              hero: { ...defaultContent.hero, ...data.hero },
+              whyChooseUs: { ...defaultContent.whyChooseUs, ...data.whyChooseUs },
+              aboutUs: { ...defaultContent.aboutUs, ...data.aboutUs },
+              footer: { ...defaultContent.footer, ...data.footer },
+              themesSection: {
+                ...defaultContent.themesSection,
+                ...data.themesSection,
+                categories: data.themesSection?.categories || defaultContent.themesSection.categories,
+                subcategories: data.themesSection?.subcategories || defaultContent.themesSection.subcategories,
+                items: data.themesSection?.items || defaultContent.themesSection.items,
+              },
+              seo: { ...defaultContent.seo, ...data.seo },
+            };
+            setContent(merged);
           } else {
             setContent(defaultContent);
           }
@@ -103,6 +140,62 @@ export default function App() {
     if (match) {
       const item = content.themesSection.items.find((i) => i.id === Number(match[1])) || null;
       if (item) setSelectedItem(item);
+    }
+  }, [content]);
+
+  // Synchronize Google search SEO tags & favicon logo dynamically on load
+  useEffect(() => {
+    if (!content) return;
+
+    // 1. Update Document Title
+    const title = content.seo?.metaTitle || 'Maazx Events';
+    document.title = title;
+
+    // 2. Update Meta Description
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', content.seo?.metaDescription || 'Premium event and birthday decoration studio.');
+
+    // 3. Update OG Title
+    let ogTitle = document.querySelector('meta[property="og:title"]');
+    if (!ogTitle) {
+      ogTitle = document.createElement('meta');
+      ogTitle.setAttribute('property', 'og:title');
+      document.head.appendChild(ogTitle);
+    }
+    ogTitle.setAttribute('content', title);
+
+    // 4. Update OG Description
+    let ogDesc = document.querySelector('meta[property="og:description"]');
+    if (!ogDesc) {
+      ogDesc = document.createElement('meta');
+      ogDesc.setAttribute('property', 'og:description');
+      document.head.appendChild(ogDesc);
+    }
+    ogDesc.setAttribute('content', content.seo?.metaDescription || 'Premium event and birthday decoration studio.');
+
+    // 5. Update Favicon Link
+    const faviconUrl = content.seo?.favicon || content.header.logo || '/logo.png';
+    let faviconLink = document.getElementById('dynamic-favicon') as HTMLLinkElement | null;
+    if (!faviconLink) {
+      faviconLink = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+    }
+    if (!faviconLink) {
+      faviconLink = document.createElement('link');
+      faviconLink.setAttribute('rel', 'icon');
+      faviconLink.setAttribute('id', 'dynamic-favicon');
+      document.head.appendChild(faviconLink);
+    }
+    faviconLink.setAttribute('href', faviconUrl);
+
+    // 6. Update Apple touch icon
+    let appleIconLink = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
+    if (appleIconLink) {
+      appleIconLink.setAttribute('href', faviconUrl);
     }
   }, [content]);
 
@@ -236,7 +329,14 @@ export default function App() {
         </div>
       </main>
 
-      <ThemesSection onSelectItem={handleSelectItem} content={content} />
+      <ThemesSection
+        onSelectItem={handleSelectItem}
+        content={content}
+        activeCategory={activeCategory}
+        activeSubcategory={activeSubcategory}
+        onCategoryChange={setActiveCategory}
+        onSubcategoryChange={setActiveSubcategory}
+      />
 
       <React.Suspense fallback={<div className="h-40 flex items-center justify-center">Loading...</div>}>
         <WhyChooseUs content={content} />

@@ -95,5 +95,10 @@ export const defaultContent: SiteContent = {
       "Room Decor": ["Hotel Room", "Anniversary", "Date Night"]
     },
     items: mockItems,
+  },
+  seo: {
+    metaTitle: 'Maazx Events',
+    metaDescription: 'Premium event and birthday decoration studio crafting Instagram-worthy celebrations.',
+    favicon: '/logo.png',
   }
 };

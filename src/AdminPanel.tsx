@@ -17,7 +17,26 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [activeTab, setActiveTab] = useState<'general' | 'hero' | 'about' | 'why' | 'themes'>('general');
-  const [content, setContent] = useState<SiteContent>(initialContent || defaultContent);
+  const [content, setContent] = useState<SiteContent>(() => {
+    const raw = initialContent || defaultContent;
+    return {
+      ...defaultContent,
+      ...raw,
+      header: { ...defaultContent.header, ...raw.header },
+      hero: { ...defaultContent.hero, ...raw.hero },
+      whyChooseUs: { ...defaultContent.whyChooseUs, ...raw.whyChooseUs },
+      aboutUs: { ...defaultContent.aboutUs, ...raw.aboutUs },
+      footer: { ...defaultContent.footer, ...raw.footer },
+      themesSection: {
+        ...defaultContent.themesSection,
+        ...raw.themesSection,
+        categories: raw.themesSection?.categories || defaultContent.themesSection.categories,
+        subcategories: raw.themesSection?.subcategories || defaultContent.themesSection.subcategories,
+        items: raw.themesSection?.items || defaultContent.themesSection.items,
+      },
+      seo: { ...defaultContent.seo, ...raw.seo },
+    };
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -34,7 +53,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
 
   const findParentCategory = (subcat: string): string => {
     for (const [parent, subs] of Object.entries(content.themesSection.subcategories)) {
-      if (subs.includes(subcat)) return parent;
+      if (Array.isArray(subs) && subs.includes(subcat)) return parent;
     }
     return content.themesSection.categories[0] || 'Wedding';
   };
@@ -52,6 +71,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
 
   // File Upload Ref Hooks
   const logoUploadRef = useRef<HTMLInputElement>(null);
+  const faviconUploadRef = useRef<HTMLInputElement>(null);
   const heroBgUploadRef = useRef<HTMLInputElement>(null);
   const beforeUploadRef = useRef<HTMLInputElement>(null);
   const afterUploadRef = useRef<HTMLInputElement>(null);
@@ -687,6 +707,70 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
                       placeholder="https://tiktok.com/@..."
                       className="w-full px-4 py-2.5 rounded-xl border border-[#EAE4D9] text-sm text-[#2C2A26]"
                     />
+                  </div>
+                </div>
+
+                {/* Google Search & SEO Settings */}
+                <div className="md:col-span-2 pt-6 mt-6 border-t border-[#F1EFEC] flex flex-col gap-6">
+                  <div>
+                    <h3 className="text-lg font-serif text-[#2C2A26] font-semibold mb-1">Google Search & SEO Settings</h3>
+                    <p className="text-xs text-[#8A867A]">Manage how your business appears on Google Search results and browser tabs</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* SEO Title & Description */}
+                    <div className="md:col-span-2 flex flex-col gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-[#5C584E] mb-2">Search Engine Title (Google Title)</label>
+                        <input
+                          type="text"
+                          value={content.seo?.metaTitle || ''}
+                          onChange={(e) => updateField('seo.metaTitle', e.target.value)}
+                          placeholder="Maazx Events"
+                          className="w-full px-4 py-2.5 rounded-xl border border-[#EAE4D9] text-sm text-[#2C2A26]"
+                        />
+                        <p className="text-[10px] text-[#8A867A] mt-1">Recommended: Under 60 characters. Shows up as the clickable link on Google.</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-[#5C584E] mb-2">Search Engine Description (Google Description)</label>
+                        <textarea
+                          value={content.seo?.metaDescription || ''}
+                          onChange={(e) => updateField('seo.metaDescription', e.target.value)}
+                          placeholder="Premium event and birthday decoration studio crafting Instagram-worthy celebrations."
+                          rows={3}
+                          className="w-full px-4 py-2.5 rounded-xl border border-[#EAE4D9] text-sm text-[#2C2A26]"
+                        />
+                        <p className="text-[10px] text-[#8A867A] mt-1">Recommended: Under 160 characters. Shows up as the description snippet below your link on Google.</p>
+                      </div>
+                    </div>
+
+                    {/* Google Favicon Logo Upload */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-[#5C584E]">Google Logo / Browser Favicon</label>
+                      <div className="border border-[#EAE4D9] rounded-2xl overflow-hidden shadow-inner bg-black/5 relative aspect-square flex flex-col justify-end p-4">
+                        <img 
+                          src={content.seo?.favicon || content.header.logo || '/logo.png'} 
+                          alt="Favicon Preview" 
+                          className="absolute inset-0 m-auto h-20 w-20 object-contain p-2 bg-white rounded-xl shadow-md z-0" 
+                        />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          ref={faviconUploadRef}
+                          onChange={(e) => handleFileUpload(e, 'seo.favicon')}
+                          className="hidden"
+                        />
+                        <button
+                          onClick={() => faviconUploadRef.current?.click()}
+                          className="relative z-10 flex items-center justify-center gap-1.5 bg-black/60 hover:bg-black/80 text-white w-full py-2.5 rounded-xl text-xs font-medium backdrop-blur-sm transition cursor-pointer"
+                        >
+                          <Upload size={14} />
+                          Upload New Favicon
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-[#8A867A] mt-1 text-center">Google displays a 1:1 square icon next to your site in search results.</p>
+                    </div>
                   </div>
                 </div>
               </div>

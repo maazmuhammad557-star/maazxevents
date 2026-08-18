@@ -7,29 +7,44 @@ import { defaultContent } from './defaultContent';
 interface ThemesSectionProps {
   onSelectItem: (item: ThemeItem) => void;
   content?: SiteContent;
+  activeCategory: string;
+  activeSubcategory: string;
+  onCategoryChange: (category: string) => void;
+  onSubcategoryChange: (subcategory: string) => void;
 }
 
-export default function ThemesSection({ onSelectItem, content }: ThemesSectionProps) {
+export default function ThemesSection({
+  onSelectItem,
+  content,
+  activeCategory,
+  activeSubcategory,
+  onCategoryChange,
+  onSubcategoryChange,
+}: ThemesSectionProps) {
   const activeContent = content || defaultContent;
   const { themesSection } = activeContent;
 
-  const [activeCategory, setActiveCategory] = useState(themesSection.categories[0] || "Wedding");
-  const [activeSubcategory, setActiveSubcategory] = useState(
-    (themesSection.subcategories[themesSection.categories[0] || "Wedding"]?.[0]) || "Bridal Shower"
-  );
   const [visibleCount, setVisibleCount] = useState(4);
   const constraintsRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [dragBounds, setDragBounds] = useState({ left: 0, right: 0 });
 
-  // Update states if content/categories change
+  const categories = themesSection.categories;
+  const subcategories = themesSection.subcategories;
+  const items = themesSection.items;
+
+  const effectiveCategory = activeCategory && categories.includes(activeCategory)
+    ? activeCategory
+    : categories[0] || '';
+  const effectiveSubcategory = activeSubcategory && (subcategories[effectiveCategory] || []).includes(activeSubcategory)
+    ? activeSubcategory
+    : subcategories[effectiveCategory]?.[0] || '';
+
+  // Sync effective values up to parent state so browsing position survives navigation
   useEffect(() => {
-    if (themesSection.categories.length > 0) {
-      const firstCat = themesSection.categories[0];
-      setActiveCategory(firstCat);
-      setActiveSubcategory(themesSection.subcategories[firstCat]?.[0] || "");
-    }
-  }, [content]);
+    if (effectiveCategory !== activeCategory) onCategoryChange(effectiveCategory);
+    if (effectiveSubcategory !== activeSubcategory) onSubcategoryChange(effectiveSubcategory);
+  }, [effectiveCategory, effectiveSubcategory, activeCategory, activeSubcategory]);
 
   useEffect(() => {
     const updateBounds = () => {
@@ -61,13 +76,9 @@ export default function ThemesSection({ onSelectItem, content }: ThemesSectionPr
     }
 
     return () => resizeObserver.disconnect();
-  }, [activeCategory, content]);
+  }, [effectiveCategory, content]);
 
-  const categories = themesSection.categories;
-  const subcategories = themesSection.subcategories;
-  const items = themesSection.items;
-
-  const activeSubs = subcategories[activeCategory] || [];
+  const activeSubs = subcategories[effectiveCategory] || [];
 
   return (
     <section id="themes-section" className="w-full max-w-6xl mx-auto mt-24 md:mt-48 px-4 pb-32">
@@ -88,12 +99,12 @@ export default function ThemesSection({ onSelectItem, content }: ThemesSectionPr
           <button
             key={c}
             onClick={() => { 
-              setActiveCategory(c); 
-              setActiveSubcategory(subcategories[c]?.[0] || ""); 
+              onCategoryChange(c); 
+              onSubcategoryChange(subcategories[c]?.[0] || ""); 
               setVisibleCount(4); 
             }}
             className={`flex-1 py-3 md:py-3.5 px-4 md:px-6 rounded-full text-[14px] md:text-[15px] font-medium transition-all min-w-[140px] whitespace-nowrap cursor-pointer ${
-              activeCategory === c 
+              effectiveCategory === c 
                 ? 'bg-[#6A665A] text-white shadow-md' 
                 : 'bg-white text-[#4D4943] hover:bg-white/70 shadow-sm'
             }`}
@@ -118,9 +129,9 @@ export default function ThemesSection({ onSelectItem, content }: ThemesSectionPr
             {activeSubs.map((s) => (
               <motion.button
                 key={s}
-                onClick={() => { setActiveSubcategory(s); setVisibleCount(4); }}
+                onClick={() => { onSubcategoryChange(s); setVisibleCount(4); }}
                 className={`flex-none px-4 py-2 md:py-1.5 rounded-full text-[13px] md:text-sm font-medium transition-colors whitespace-nowrap border cursor-pointer ${
-                  activeSubcategory === s 
+                  effectiveSubcategory === s 
                     ? 'bg-[#8B867B] text-white border-[#8B867B] shadow-sm' 
                     : 'bg-transparent text-[#6A665A] border-[#D1CCC3] hover:bg-[#F2ECE4]'
                 }`}
@@ -136,7 +147,7 @@ export default function ThemesSection({ onSelectItem, content }: ThemesSectionPr
       {/* Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
         {items
-          .filter(item => item.category === activeSubcategory)
+          .filter(item => item.category === effectiveSubcategory)
           .slice(0, visibleCount)
           .map(item => (
           <div 
@@ -169,7 +180,7 @@ export default function ThemesSection({ onSelectItem, content }: ThemesSectionPr
       </div>
 
       {/* Load More Button */}
-      {items.filter(item => item.category === activeSubcategory).length > visibleCount && (
+      {items.filter(item => item.category === effectiveSubcategory).length > visibleCount && (
         <div className="flex justify-center mt-10 md:mt-12">
           <button
             onClick={() => setVisibleCount(prev => prev + 4)}

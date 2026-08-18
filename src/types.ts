@@ -77,4 +77,9 @@ export interface SiteContent {
     subcategories: Record<string, string[]>;
     items: ThemeItem[];
   };
+  seo?: {
+    metaTitle: string;
+    metaDescription: string;
+    favicon: string;
+  };
 }
