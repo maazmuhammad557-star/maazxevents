@@ -1516,19 +1516,19 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
                           <label className="block text-xs font-bold text-[#5C584E] mb-1.5">Display Price</label>
                           <input
                             type="text"
-                            value={editingItem.price}
-                            onChange={(e) => setEditingItem({ ...editingItem, price: e.target.value })}
-                            placeholder="Rs 25,000"
+                            value={editingItem.actualPrice}
+                            onChange={(e) => setEditingItem({ ...editingItem, actualPrice: e.target.value })}
+                            placeholder="Rs 20,000"
                             className="w-full px-3.5 py-2 border border-[#EAE4D9] rounded-xl text-sm"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-[#5C584E] mb-1.5">Actual Price (Sale / Crossed out)</label>
+                          <label className="block text-xs font-bold text-[#5C584E] mb-1.5">Discounted Price (crossed out)</label>
                           <input
                             type="text"
-                            value={editingItem.actualPrice}
-                            onChange={(e) => setEditingItem({ ...editingItem, actualPrice: e.target.value })}
-                            placeholder="Rs 20,000"
+                            value={editingItem.price}
+                            onChange={(e) => setEditingItem({ ...editingItem, price: e.target.value })}
+                            placeholder="Rs 25,000"
                             className="w-full px-3.5 py-2 border border-[#EAE4D9] rounded-xl text-sm"
                           />
                         </div>
@@ -1916,9 +1916,9 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
                             </div>
                             <div>
                               <div className="flex items-baseline gap-1.5 mb-3">
-                                <span className="text-sm font-bold text-[#6A665A]">{item.price}</span>
-                                {item.actualPrice && (
-                                  <span className="text-[10px] text-[#8A867A] line-through">{item.actualPrice}</span>
+                                <span className="text-sm font-bold text-[#6A665A]">{item.actualPrice}</span>
+                                {item.price && (
+                                  <span className="text-[10px] text-[#8A867A] line-through">{item.price}</span>
                                 )}
                               </div>
                               <div className="flex items-center gap-2 border-t border-[#F1EFEC] pt-3">
