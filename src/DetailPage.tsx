@@ -10,9 +10,11 @@ interface DetailPageProps {
   item: ThemeItem;
   onBack: () => void;
   onSelectItem: (item: ThemeItem) => void;
+  catalog?: ThemeItem[];
+  subcategories?: Record<string, string[]>;
 }
 
-export default function DetailPage({ item, onBack, onSelectItem }: DetailPageProps) {
+export default function DetailPage({ item, onBack, onSelectItem, catalog, subcategories }: DetailPageProps) {
   const [[page, direction], setPage] = useState([0, 0]);
   const constraintsRef = useRef<HTMLDivElement>(null);
   
@@ -55,9 +57,36 @@ export default function DetailPage({ item, onBack, onSelectItem }: DetailPagePro
     window.open(waUrl, '_blank');
   };
 
-  const relatedItems = mockItems.filter(
-    (relatedItem) => relatedItem.category === item.category && relatedItem.id !== item.id
-  );
+  const catalogItems = catalog || mockItems;
+
+  const findParentCategory = (sub: string): string | null => {
+    if (!subcategories) return null;
+    for (const [parent, list] of Object.entries(subcategories)) {
+      if (Array.isArray(list) && list.includes(sub)) return parent;
+    }
+    return null;
+  };
+
+  const relatedItems = (() => {
+    // 1. Same collection (exact category)
+    const sameCategory = catalogItems.filter(
+      (relatedItem) => relatedItem.category === item.category && relatedItem.id !== item.id
+    );
+    if (sameCategory.length > 0) return sameCategory;
+
+    // 2. Same parent category
+    const parent = findParentCategory(item.category);
+    if (parent) {
+      const parentSubs = subcategories?.[parent] || [];
+      const parentItems = catalogItems.filter(
+        (relatedItem) => parentSubs.includes(relatedItem.category) && relatedItem.id !== item.id
+      );
+      if (parentItems.length > 0) return parentItems;
+    }
+
+    // 3. Last fallback: other setups from the catalog
+    return catalogItems.filter((relatedItem) => relatedItem.id !== item.id).slice(-3);
+  })();
 
   return (
     <div 

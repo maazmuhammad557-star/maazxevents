@@ -228,6 +228,8 @@ export default function App() {
           item={selectedItem} 
           onBack={handleBackToCatalog} 
           onSelectItem={handleSelectItem}
+          catalog={content.themesSection.items}
+          subcategories={content.themesSection.subcategories}
         />
       </React.Suspense>
     );
