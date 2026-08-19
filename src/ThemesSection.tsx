@@ -162,8 +162,8 @@ export default function ThemesSection({
               <h3 className="font-serif text-2xl md:text-3xl text-[#4D4943] mb-2 group-hover:text-[#6A665A] transition-colors">{item.title}</h3>
               <div className="flex items-center justify-between min-h-[30px]">
                 <div className="flex items-center gap-2 md:gap-3">
-                  <p className="text-[#6A665A] text-[20px] md:text-[22px] font-semibold whitespace-nowrap tracking-tight">{item.actualPrice}</p>
-                  <p className="text-[#B5B0A6] line-through text-[14px] md:text-[15px] font-medium whitespace-nowrap">{item.price}</p>
+                  <p className="text-[#6A665A] text-[20px] md:text-[22px] font-semibold whitespace-nowrap tracking-tight">{item.price}</p>
+                  <p className="text-[#B5B0A6] line-through text-[14px] md:text-[15px] font-medium whitespace-nowrap">{item.actualPrice}</p>
                 </div>
                 <div className="flex items-center gap-[7px] md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 transform md:translate-x-4 md:group-hover:translate-x-0">
                   <span className="text-[#57554C] font-medium text-[15px] md:text-[17px] hidden sm:block">

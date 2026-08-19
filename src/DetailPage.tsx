@@ -50,7 +50,7 @@ export default function DetailPage({ item, onBack, onSelectItem }: DetailPagePro
   };
 
   const handleWhatsApp = () => {
-    const message = `Hello! I am interested in booking the "${item.title}".\n\nDetails:\n- Price: ${item.actualPrice} (Original: ${item.price})\n\nPlease let me know about availability!`;
+    const message = `Hello! I am interested in booking the "${item.title}".\n\nDetails:\n- Price: ${item.price}${item.actualPrice ? ` (Discounted: ${item.actualPrice})` : ''}\n\nPlease let me know about availability!`;
     const waUrl = `https://api.whatsapp.com/send/?phone=923252938365&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
     window.open(waUrl, '_blank');
   };
@@ -167,8 +167,8 @@ export default function DetailPage({ item, onBack, onSelectItem }: DetailPagePro
             
             {/* Price Box */}
             <div className="bg-[#F1EFEC] rounded-[20px] p-5 mb-8 flex items-center gap-4">
-              <span className="text-[28px] md:text-[32px] font-medium text-black">{item.actualPrice}</span>
-              <span className="text-[18px] text-[#A39E93] line-through">{item.price}</span>
+              <span className="text-[28px] md:text-[32px] font-medium text-black">{item.price}</span>
+              <span className="text-[18px] text-[#A39E93] line-through">{item.actualPrice}</span>
             </div>
 
             <p className="text-[#57554C] text-[16px] leading-relaxed mb-10">
@@ -268,12 +268,12 @@ export default function DetailPage({ item, onBack, onSelectItem }: DetailPagePro
                     <div className="flex justify-between items-start gap-4">
                       <h3 className="font-serif text-xl md:text-2xl text-[#2C2A26] group-hover:text-[#6A665A] transition-colors">{related.title}</h3>
                       <div className="text-right shrink-0">
-                        <p className="text-[#2C2A26] font-medium text-lg">{related.actualPrice}</p>
+                        <p className="text-[#2C2A26] font-medium text-lg">{related.price}</p>
                       </div>
                     </div>
                     <div className="flex justify-between items-center mt-1">
                       <p className="text-[#8C877D] text-sm uppercase tracking-wider">{related.category}</p>
-                      <p className="text-[#B5B0A6] line-through text-sm">{related.price}</p>
+                      <p className="text-[#B5B0A6] line-through text-sm">{related.actualPrice}</p>
                     </div>
                   </div>
                 </div>
