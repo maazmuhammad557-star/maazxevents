@@ -596,7 +596,7 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
               MK
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate">Maaz Khan</p>
+              <p className="text-xs font-bold text-white truncate">Mr Maaz</p>
               <p className="text-[10px] text-[#8E8A82] truncate">CMS Administrator</p>
             </div>
           </div>
@@ -1008,6 +1008,69 @@ export default function AdminPanel({ onBackToSite, initialContent }: AdminPanelP
                       onChange={(e) => updateField('whyChooseUs.stressFreeTitle', e.target.value)}
                       className="w-full px-4 py-2.5 rounded-xl border border-[#EAE4D9] text-sm text-[#2C2A26]"
                     />
+                  </div>
+
+                  <div className="md:col-span-2 flex flex-col gap-2">
+                    <label className="text-xs font-bold text-[#5C584E]">Stress-Free Planning Image (Handshake)</label>
+                    <div className="border border-[#EAE4D9] rounded-2xl overflow-hidden relative aspect-[16/9] flex flex-col justify-end p-3">
+                      <img src={content.whyChooseUs.stressFreeImage} alt="Stress-Free Planning" className="absolute inset-0 w-full h-full object-cover z-0" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={stressFreeUploadRef}
+                        onChange={(e) => handleFileUpload(e, 'whyChooseUs.stressFreeImage')}
+                        className="hidden"
+                      />
+                      <button
+                        onClick={() => stressFreeUploadRef.current?.click()}
+                        className="relative z-10 w-full py-2 bg-black/60 hover:bg-black/85 text-white rounded-xl text-[10px] font-medium backdrop-blur-sm cursor-pointer"
+                      >
+                        Change Stress-Free Image
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Slider Before/After Images */}
+                <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-[#F1EFEC]">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-bold text-[#5C584E]">Before Image (Slider)</label>
+                    <div className="border border-[#EAE4D9] rounded-2xl overflow-hidden relative aspect-[16/9] flex flex-col justify-end p-3">
+                      <img src={content.whyChooseUs.beforeImage} alt="Before" className="absolute inset-0 w-full h-full object-cover z-0" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={beforeUploadRef}
+                        onChange={(e) => handleFileUpload(e, 'whyChooseUs.beforeImage')}
+                        className="hidden"
+                      />
+                      <button
+                        onClick={() => beforeUploadRef.current?.click()}
+                        className="relative z-10 w-full py-2 bg-black/60 hover:bg-black/85 text-white rounded-xl text-[10px] font-medium backdrop-blur-sm cursor-pointer"
+                      >
+                        Change Before Image
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-bold text-[#5C584E]">After Image (Slider)</label>
+                    <div className="border border-[#EAE4D9] rounded-2xl overflow-hidden relative aspect-[16/9] flex flex-col justify-end p-3">
+                      <img src={content.whyChooseUs.afterImage} alt="After" className="absolute inset-0 w-full h-full object-cover z-0" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={afterUploadRef}
+                        onChange={(e) => handleFileUpload(e, 'whyChooseUs.afterImage')}
+                        className="hidden"
+                      />
+                      <button
+                        onClick={() => afterUploadRef.current?.click()}
+                        className="relative z-10 w-full py-2 bg-black/60 hover:bg-black/85 text-white rounded-xl text-[10px] font-medium backdrop-blur-sm cursor-pointer"
+                      >
+                        Change After Image
+                      </button>
+                    </div>
                   </div>
                 </div>
 
